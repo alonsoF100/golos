@@ -21,7 +21,9 @@ func (rt Router) Setup() *chi.Mux {
 	// TODO настроитьмрашруты
 	// TODO настроить конфигурацию middleware
 
-	// r.Route("/golos/")
+	r.Route("/golos/user", func(r chi.Router) {
+		r.Post("/", rt.handlers.CreateUser)
+	})
 
 	return r
 }

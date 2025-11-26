@@ -12,4 +12,8 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-// TODO добавить методы хранилищу 
+// TODO добавить методы хранилищу
+func (r Repository) UserExist(nicname string) (bool, error) {
+	// TODO реализовать функциональность
+	return false, nil
+}
