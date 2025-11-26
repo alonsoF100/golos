@@ -15,6 +15,14 @@ import (
 type Service interface {
 	// TODO добавить контракты для интерфейса
 	CreateUser(nickname, password string) (*models.User, error)
+
+	// TODO потом тут высрем quary params для сортировки братков
+	GetUsers() ([]*models.User, error)
+
+	GetUser(uuid string) (*models.User, error)
+	UpdateUser(uuid, nickname, password string) (*models.User, error)
+	DeleteUser(uuid string) error
+	PatchUser(uuid string, nickname, password *string) (*models.User, error)
 }
 
 type Handler struct {
@@ -202,7 +210,10 @@ failed:
 func (h *Handler) PathUser(w http.ResponseWriter, r *http.Request) {
 	// TODO реализовать частичное обновления пользователя по айдишнику + указанным в json полям
 
-	// 1. Создать dto где будет лежать айдишник пользователя + ТОЛЬКО УКАЗАННЫЕ ПОЛЯ( ЧАСТИЧНОЕ ОБНОВЛЕНИЕ PATCH) для записи
+	// 1. Создать dto где будет лежать айдишник пользователя + ТОЛЬКО УКАЗАННЫЕ ПОЛЯ( ЧАСТИЧНОЕ ОБНОВЛЕНИЕ PATCH)
+	// для записи ТУТ ЕЩЕ НАДО ПОМНИТЬ ЧТО ПОЛЯ МОГУ БЫТЬ НЕОБЯЗАТЕЛЬНЫМИ ПАРОЛЬ И НИКНЕЙМ ТАК ЧТО ОНИ БУДЕТ ТИПА *string
+	// Чтобы если ничо не пришло выдавать nil в слой сервиса, чтобы там по кайфу обработать чо как газ газ
+	
 	// 2. Записать в dto айдишник
 	// 3. Записать в dto полученные в json поля
 	// 4. Запарсить dto через validator/v10
