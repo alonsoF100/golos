@@ -6,3 +6,7 @@ type UserRequest struct {
 	Nickname string `json:"nickname" validate:"required,alphanum,min=3,max=12"`
 	Password string `json:"password" validate:"required,min=5,max=20"`
 }
+
+type UserID struct {
+	ID string `jsom:"id" validate:"required,uuid"`
+}

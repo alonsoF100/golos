@@ -37,3 +37,26 @@ func NewUserResponse(user *models.User) UserResponse {
 		UpdatedAt: user.UpdatedAt,
 	}
 }
+
+type UsersResponse struct {
+	users []*UserResponse
+}
+
+func NewUsersResponse(users []*models.User) UsersResponse {
+	responseUsers := UsersResponse{
+		users: make([]*UserResponse, 0, len(users)),
+	}
+
+	for _, user := range users {
+		temp := &UserResponse{
+			ID:        user.ID,
+			Nickname:  user.Nickname,
+			Password:  user.Password,
+			CreatedAt: user.UpdatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}
+		responseUsers.users = append(responseUsers.users, temp)
+	}
+
+	return responseUsers
+}

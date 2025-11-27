@@ -104,12 +104,22 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+
 	// TODO реализовать хендлер для получения всех пользователей
 
 	// 1. Cходить в сервисный слой за пользователями(вернется слайс + ошибка)
-	// 2. Обработать ошибки
+	users, err := h.service.GetUsers()
+	if err != nil {
+		// 2. Обработать ошибки
+		switch err {
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
 	// 3. Собрать(сделать функцию helper в dto response, которая переберт полученный слайс) и
 	// отправить ответ, содержащий всех пользователей + статус код
+	WriteJSON(w, http.StatusOK, dto.NewUsersResponse(users))
 }
 
 /*
@@ -131,7 +141,9 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	// TODO реализовать хендлер для получения пользователя по айдишнику
 
 	// 1. Создать dto где будет лежать айдишник пользователя
+	var req dto.UserID
 	// 2. Записать в dto айдишник
+
 	// 3. Запарсить dto через validator/v10
 	// 4. Сходить в сервисный слой за пользователем(вернется пользователь + ошибка)
 	// 5. обработать ошибки(пользователь не найден + ошибка сервака)
@@ -213,7 +225,7 @@ func (h *Handler) PathUser(w http.ResponseWriter, r *http.Request) {
 	// 1. Создать dto где будет лежать айдишник пользователя + ТОЛЬКО УКАЗАННЫЕ ПОЛЯ( ЧАСТИЧНОЕ ОБНОВЛЕНИЕ PATCH)
 	// для записи ТУТ ЕЩЕ НАДО ПОМНИТЬ ЧТО ПОЛЯ МОГУ БЫТЬ НЕОБЯЗАТЕЛЬНЫМИ ПАРОЛЬ И НИКНЕЙМ ТАК ЧТО ОНИ БУДЕТ ТИПА *string
 	// Чтобы если ничо не пришло выдавать nil в слой сервиса, чтобы там по кайфу обработать чо как газ газ
-	
+
 	// 2. Записать в dto айдишник
 	// 3. Записать в dto полученные в json поля
 	// 4. Запарсить dto через validator/v10
