@@ -6,8 +6,6 @@ import (
 	"github.com/alonsoF100/golos/internal/models"
 )
 
-// TODO добавить структуры данных для ответов
-
 type ErrorResponse struct {
 	Error     string    `json:"error"`
 	TimeStamp time.Time `json:"timestamp"`

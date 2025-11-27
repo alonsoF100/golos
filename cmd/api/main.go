@@ -36,4 +36,3 @@ func main() {
 	// Запуск сервера
 	http.ListenAndServe(port, router.Setup())
 }
-

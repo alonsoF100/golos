@@ -46,7 +46,6 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
-// TODO добавить хендлеры + описапние контратов для документации
 /*
 pattern: /golos/users
 method:  POST
@@ -105,13 +104,10 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-
-	// TODO реализовать хендлер для получения всех пользователей
-
 	// 1. Cходить в сервисный слой за пользователями(вернется слайс + ошибка)
 	users, err := h.service.GetUsers()
+	// 2. Обработать ошибки
 	if err != nil {
-		// 2. Обработать ошибки
 		switch err {
 		default:
 			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
@@ -139,8 +135,6 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	// TODO реализовать хендлер для получения пользователя по айдишнику
-
 	// 1. Создать dto где будет лежать айдишник пользователя
 	var req dto.UserID
 	// 2. Записать в dto айдишник
@@ -152,6 +146,7 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// 4. Сходить в сервисный слой за пользователем(вернется пользователь + ошибка)
 	user, err := h.service.GetUser(req.ID)
+	// 5. обработать ошибки(пользователь не найден + ошибка сервака)
 	if err != nil {
 		switch err {
 		case apperrors.ErrUserNotFound:
@@ -162,7 +157,6 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// 5. обработать ошибки(пользователь не найден + ошибка сервака)
 	// 6. Собрать ответ и отправить его вместе со статус кодом
 	WriteJSON(w, http.StatusOK, dto.NewUserResponse(user))
 }
@@ -183,8 +177,6 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	// TODO реализовать хендлер по обновлению всех полей пользователя по айдишнику
-
 	// 1. Создать dto где будет лежать айдишник пользователя + ВООБЩЕ ВСЕ КРОМЕ СЛУЖЕБНЫХ поля для записи
 	var req dto.UserUpdate
 	// 2. Записать в dto айдишник
@@ -201,7 +193,6 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// 5. Сходить в сервисный слой для обновления пользователя(вернется пользователь + ошибка)
 	user, err := h.service.UpdateUser(req.ID, req.Nickname, req.Password)
-
 	// 6. обработать ошибки(пользователь не найден + ошибка сервака)
 	if err != nil {
 		switch err {
@@ -215,7 +206,6 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// 7. Собрать ответ и отправить его вместе со статус кодом
 	WriteJSON(w, http.StatusOK, user)
-
 }
 
 /*
@@ -234,8 +224,6 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	// TODO реализовать удаление пользователя по айдишнику
-
 	// 1. Создать dto где будет лежать айдишник пользователя
 	var req dto.UserID
 	// 2. Записать в dto айдишник
@@ -278,13 +266,10 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
-	// TODO реализовать частичное обновления пользователя по айдишнику + указанным в json полям
-
 	// 1. Создать dto где будет лежать айдишник пользователя + ТОЛЬКО УКАЗАННЫЕ ПОЛЯ( ЧАСТИЧНОЕ ОБНОВЛЕНИЕ PATCH)
 	var req dto.UserPatch
 	// для записи ТУТ ЕЩЕ НАДО ПОМНИТЬ ЧТО ПОЛЯ МОГУ БЫТЬ НЕОБЯЗАТЕЛЬНЫМИ ПАРОЛЬ И НИКНЕЙМ ТАК ЧТО ОНИ БУДЕТ ТИПА *string
 	// Чтобы если ничо не пришло выдавать nil в слой сервиса, чтобы там по кайфу обработать чо как газ газ
-
 	// 2. Записать в dto айдишник
 	req.ID = chi.URLParam(r, "id")
 	// 3. Записать в dto полученные в json поля
@@ -292,7 +277,6 @@ func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
 	}
-
 	// 4. Запарсить dto через validator/v10
 	if err := h.Validator.Struct(req); err != nil {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))

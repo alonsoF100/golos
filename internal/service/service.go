@@ -17,8 +17,6 @@ func New(repository Repository) *Service {
 	}
 }
 
-// TODO высрать методы сервисного слоя согласно контракту
-
 // TODO выдавить документацию к функциям малую 
 
 func (s Service) CreateUser(nickname, password string) (*models.User, error) {
