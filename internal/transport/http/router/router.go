@@ -18,10 +18,12 @@ func New(handlers *handlers.Handler) *Router {
 func (rt Router) Setup() *chi.Mux {
 	r := chi.NewRouter()
 
-	// TODO настроитьмрашруты
+	// TODO настроить маршруты
 	// TODO настроить конфигурацию middleware
 
-	// r.Route("/golos/")
+	r.Route("/golos/users", func(r chi.Router) {
+		r.Post("/", rt.handlers.CreateUser)
+	})
 
 	return r
 }
