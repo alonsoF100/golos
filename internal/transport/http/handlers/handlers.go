@@ -14,7 +14,6 @@ import (
 )
 
 type Service interface {
-	// TODO добавить контракты для интерфейса
 	CreateUser(nickname, password string) (*models.User, error)
 
 	// TODO потом тут высрем quary params для сортировки братков
