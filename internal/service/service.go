@@ -6,6 +6,7 @@ import (
 	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
@@ -31,9 +32,12 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 	id := uuid.New().String()
 	now := time.Now()
 
-	// TODO добавить хеширование пароля
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, apperrors.ErrFailedToHashPassword
+	}
 
-	user, err := s.repository.InsertUser(id, nickname, password, now, now)
+	user, err := s.repository.InsertUser(id, nickname, string(hashedPassword), now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +65,13 @@ func (s Service) GetUser(uuid string) (*models.User, error) {
 
 func (s Service) UpdateUser(uuid, nickname, password string) (*models.User, error) {
 	now := time.Now()
-	user, err := s.repository.UpdateUser(uuid, nickname, password, now)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, apperrors.ErrFailedToHashPassword
+	}
+
+	user, err := s.repository.UpdateUser(uuid, nickname, string(hashedPassword), now)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +94,17 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 		return nil, apperrors.ErrNothingToChange
 	}
 
-	user, err := s.repository.PatchUser(uuid, nickname, password, now)
+	var hashedPassword *string
+	if password != nil {
+		hashed, err := bcrypt.GenerateFromPassword([]byte(*password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, apperrors.ErrFailedToHashPassword
+		}
+		hashedStr := string(hashed)
+		hashedPassword = &hashedStr
+	}
+
+	user, err := s.repository.PatchUser(uuid, nickname, hashedPassword, now)
 	if err != nil {
 		return nil, err
 	}
