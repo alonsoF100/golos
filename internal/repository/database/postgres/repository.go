@@ -10,6 +10,7 @@ import (
 	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -23,26 +24,6 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r Repository) UserExist(nickname string) (bool, error) {
-	pp := "internal/database/postgres/repository/UserExist"
-
-	const query = `
-	SELECT COUNT(*) FROM users 
-	WHERE nickname = $1`
-
-	count := 0
-	err := r.pool.QueryRow(context.Background(), query, nickname).Scan(&count)
-	if err != nil {
-		return false, fmt.Errorf("%s: error: %w", pp, err)
-	}
-
-	if count == 0 {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 func (r Repository) InsertUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error) {
 	pp := "internal/database/postgres/repository/InsertUser"
 
@@ -52,8 +33,17 @@ func (r Repository) InsertUser(id, nickname, password string, createdAt time.Tim
 	RETURNING id, nickname, password, created_at, updated_at`
 
 	var user models.User
-	err := r.pool.QueryRow(context.Background(), query, id, nickname, password, createdAt, updatedAt).Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.pool.QueryRow(context.Background(), query, id, nickname, password, createdAt, updatedAt).Scan(
+		&user.ID,
+		&user.Nickname,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, apperrors.ErrUserAlreadyExist
+		}
 		return nil, fmt.Errorf("%s: error: %w", pp, err)
 	}
 
@@ -76,7 +66,12 @@ func (r Repository) GetUsers() ([]*models.User, error) {
 	for rows.Next() {
 		var user models.User
 
-		err := rows.Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(
+			&user.ID,
+			&user.Nickname,
+			&user.Password,
+			&user.CreatedAt,
+			&user.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("%s: error: %w", pp, err)
 		}
@@ -120,7 +115,12 @@ func (r Repository) UpdateUser(id, nickname, password string, updatedAt time.Tim
 	RETURNING id, nickname, password, created_at, updated_at`
 
 	var user models.User
-	err := r.pool.QueryRow(context.Background(), query, nickname, password, updatedAt, id).Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.pool.QueryRow(context.Background(), query, nickname, password, updatedAt, id).Scan(
+		&user.ID,
+		&user.Nickname,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperrors.ErrUserNotFound
@@ -171,7 +171,12 @@ func (r Repository) PatchUser(id string, nickname, password *string, updatedAt t
 	}
 
 	var user models.User
-	err = r.pool.QueryRow(context.Background(), query, args...).Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err = r.pool.QueryRow(context.Background(), query, args...).Scan(
+		&user.ID,
+		&user.Nickname,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperrors.ErrUserNotFound

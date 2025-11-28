@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/google/uuid"
 )
 
 type Repository interface {
-	UserExist(nickname string) (bool, error)
 	InsertUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error)
 	GetUsers() ([]*models.User, error)
 	GetUser(id string) (*models.User, error)
@@ -30,21 +28,12 @@ func New(repository Repository) *Service {
 }
 
 func (s Service) CreateUser(nickname, password string) (*models.User, error) {
-	exist, err := s.repository.UserExist(nickname)
-	if err != nil {
-		return nil, err
-	}
-	if exist {
-		return nil, apperrors.ErrUserAlreadyExist
-	}
+	id := uuid.New().String()
+	now := time.Now()
 
 	// TODO добавить хеширование пароля
-	t := time.Now()
-	id := uuid.New().String()
-	createdAt := t
-	updatedAt := t
 
-	user, err := s.repository.InsertUser(id, nickname, password, createdAt, updatedAt)
+	user, err := s.repository.InsertUser(id, nickname, password, now, now)
 	if err != nil {
 		return nil, err
 	}
