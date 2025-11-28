@@ -1,9 +1,9 @@
 package service
 
 import (
-	"fmt"
 	"time"
 
+	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/google/uuid"
 )
@@ -42,40 +42,52 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 }
 
 func (s Service) GetUsers() ([]*models.User, error) {
-	// TODO высрать функциональность
+	users, err := s.repository.GetUsers()
+	if err != nil {
+		return nil, err
+	}
 
-	// Пока загшлука на вывод, чтобы красным не гадило
-	return nil, nil
+	return users, nil
 }
 
 func (s Service) GetUser(uuid string) (*models.User, error) {
-	// TODO высрать функциональность
+	user, err := s.repository.GetUser(uuid)
+	if err != nil {
+		return nil, err
+	}
 
-	// Пока загшлука на вывод, чтобы красным не гадило
-	return nil, nil
+	return user, nil
 }
 
 func (s Service) UpdateUser(uuid, nickname, password string) (*models.User, error) {
-	// TODO высрать функциональность
+	now := time.Now()
+	user, err := s.repository.UpdateUser(uuid, nickname, password, now)
+	if err != nil {
+		return nil, err
+	}
 
-	// Пока загшлука на вывод, чтобы красным не гадило
-	return nil, nil
+	return user, nil
 }
 
 func (s Service) DeleteUser(uuid string) error {
-	// TODO высрать функциональность
+	err := s.repository.DeleteUser(uuid)
+	if err != nil {
+		return err
+	}
 
-	// Пока загшлука на вывод, чтобы красным не гадило
 	return nil
 }
 
 func (s Service) PatchUser(uuid string, nickname, password *string) (*models.User, error) {
-	pp := "internal/service/PathUser"
-	// TODO высрать функциональность
+	now := time.Now()
 	if nickname == nil && password == nil {
-		return nil, fmt.Errorf("%s: error: no fields to update", pp)
+		return nil, apperrors.ErrNothingToChange
 	}
 
-	// Пока загшлука на вывод, чтобы красным не гадило
-	return nil, nil
+	user, err := s.repository.PatchUser(uuid, nickname, password, now)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
