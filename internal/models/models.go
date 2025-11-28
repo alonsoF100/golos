@@ -2,12 +2,10 @@ package models
 
 import "time"
 
-// TODO описать модели данных, с которыми сможем работать во всех слоях
-
 type User struct {
-	ID string `json:"id"`
-	Nickname string `json:"nickname"`
-	Password string `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        string
+	Nickname  string
+	Password  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
