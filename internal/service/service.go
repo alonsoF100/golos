@@ -10,9 +10,13 @@ import (
 )
 
 type Repository interface {
-	// TODO добавить контракты для интерфейса
 	UserExist(nickname string) (bool, error)
 	InsertUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error)
+	GetUsers() ([]*models.User, error)
+	GetUser(id string) (*models.User, error)
+	UpdateUser(id, nickname, password string, updatedAt time.Time) (*models.User, error)
+	DeleteUser(id string) error
+	PatchUser(id string, nickname, password *string, updatedAt time.Time) (*models.User, error)
 }
 
 type Service struct {
@@ -24,8 +28,6 @@ func New(repository Repository) *Service {
 		repository: repository,
 	}
 }
-
-// TODO выдавить документацию к функциям малую
 
 func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 	exist, err := s.repository.UserExist(nickname)

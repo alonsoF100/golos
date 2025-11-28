@@ -118,8 +118,8 @@ func (r Repository) UpdateUser(id, nickname, password string, updatedAt time.Tim
 	SET nickname = $1, password = $2, updated_at = $3
 	WHERE id = $4
 	RETURNING id, nickname, password, created_at, updated_at`
-	var user models.User
 
+	var user models.User
 	err := r.pool.QueryRow(context.Background(), query, nickname, password, updatedAt, id).Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -156,26 +156,21 @@ func (r Repository) PatchUser(id string, nickname, password *string, updatedAt t
 	qb := squirrel.Update("users").
 		Set("updated_at", updatedAt).
 		Where(squirrel.Eq{"id": id})
-
 	if nickname != nil {
 		qb = qb.Set("nickname", *nickname)
 	}
-
 	if password != nil {
 		qb = qb.Set("password", *password)
 	}
-
 	query, args, err := qb.
 		PlaceholderFormat(squirrel.Dollar).
 		Suffix("RETURNING id, nickname, password, created_at, updated_at").
 		ToSql()
-
 	if err != nil {
 		return nil, fmt.Errorf("%s: error: %w", pp, err)
 	}
 
 	var user models.User
-
 	err = r.pool.QueryRow(context.Background(), query, args...).Scan(&user.ID, &user.Nickname, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
