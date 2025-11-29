@@ -24,8 +24,8 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r Repository) InsertUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error) {
-	pp := "internal/database/postgres/repository/InsertUser"
+func (r Repository) CreateUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error) {
+	pp := "internal/database/postgres/repository/CreatetUser"
 
 	const query = `
 	INSERT INTO users (id, nickname, password, created_at, updated_at)

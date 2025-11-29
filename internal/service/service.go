@@ -10,12 +10,14 @@ import (
 )
 
 type Repository interface {
-	InsertUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error)
+	CreateUser(id, nickname, password string, createdAt time.Time, updatedAt time.Time) (*models.User, error)
 	GetUsers() ([]*models.User, error)
 	GetUser(id string) (*models.User, error)
 	UpdateUser(id, nickname, password string, updatedAt time.Time) (*models.User, error)
 	DeleteUser(id string) error
 	PatchUser(id string, nickname, password *string, updatedAt time.Time) (*models.User, error)
+
+	CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error)
 }
 
 type Service struct {
@@ -37,7 +39,7 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 		return nil, apperrors.ErrFailedToHashPassword
 	}
 
-	user, err := s.repository.InsertUser(id, nickname, string(hashedPassword), now, now)
+	user, err := s.repository.CreateUser(id, nickname, string(hashedPassword), now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -110,4 +112,20 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 	}
 
 	return user, nil
+}
+
+func (s Service) CreateElection(userID string, name string, description *string) (*models.Election, error) {
+	now := time.Now()
+	id := uuid.New().String()
+
+	election, err := s.repository.CreateElection(id, userID, name, description, now, now)
+	if err != nil {
+		return nil, err
+	}
+
+	return election, nil
+}
+
+func (s Service) GetElections() ([]*models.Election, error) {
+	
 }
