@@ -53,7 +53,7 @@ info:    JSON in request body
 succeed:
 
 	-status code:   201 created
-	-response body: JSON represented created product
+	-response body: JSON represented created user
 
 failed:
 
@@ -296,4 +296,46 @@ func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
 	}
 	// 7. Собрать ответ и отправить его вместе со статус кодом
 	WriteJSON(w, http.StatusOK, dto.NewUserResponse(user))
+}
+
+/*
+pattern: /golos/elections
+method:  POST
+info:    JSON in request body
+
+succeed:
+
+	-status code:   201 created
+	-response body: JSON represented created election
+
+failed:
+
+	-status code:   400, 409, 500
+	-response body: JSON with error + time
+*/
+func (h *Handler) CreateElection(w http.ResponseWriter, r *http.Request) {
+	var req dto.ElectionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	election, err := h.service.Create(req.Nickname, req.Password)
+	if err != nil {
+		switch err {
+		case apperrors.ErrUserAlreadyExist:
+			WriteJSON(w, http.StatusConflict, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusCreated, dto.(election))
 }
