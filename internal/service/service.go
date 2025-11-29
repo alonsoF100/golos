@@ -18,6 +18,7 @@ type Repository interface {
 	PatchUser(id string, nickname, password *string, updatedAt time.Time) (*models.User, error)
 
 	CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error)
+	GetElections() ([]*models.Election, error)
 }
 
 type Service struct {
@@ -127,5 +128,10 @@ func (s Service) CreateElection(userID string, name string, description *string)
 }
 
 func (s Service) GetElections() ([]*models.Election, error) {
-	
+	elections, err := s.repository.GetElections()
+	if err != nil {
+		return nil, err
+	}
+
+	return elections, nil
 }
