@@ -21,7 +21,7 @@ func (rt Router) Setup() *chi.Mux {
 	r.Route("/golos/users", func(r chi.Router) {
 		r.Post("/", rt.handlers.CreateUser)
 		r.Get("/", rt.handlers.GetUsers)
-		r.Route("{id}", func(r chi.Router) {
+		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", rt.handlers.GetUser)
 			r.Put("/", rt.handlers.UpdateUser)
 			r.Patch("/", rt.handlers.PatchUser)

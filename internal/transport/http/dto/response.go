@@ -37,12 +37,12 @@ func NewUserResponse(user *models.User) UserResponse {
 }
 
 type UsersResponse struct {
-	users []*UserResponse
+	Users []*UserResponse
 }
 
 func NewUsersResponse(users []*models.User) UsersResponse {
 	responseUsers := UsersResponse{
-		users: make([]*UserResponse, 0, len(users)),
+		Users: make([]*UserResponse, 0, len(users)),
 	}
 
 	for _, user := range users {
@@ -53,7 +53,7 @@ func NewUsersResponse(users []*models.User) UsersResponse {
 			CreatedAt: user.UpdatedAt,
 			UpdatedAt: user.UpdatedAt,
 		}
-		responseUsers.users = append(responseUsers.users, temp)
+		responseUsers.Users = append(responseUsers.Users, temp)
 	}
 
 	return responseUsers

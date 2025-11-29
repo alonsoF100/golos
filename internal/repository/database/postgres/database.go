@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 )
 
 func NewPool(connString string) (*pgxpool.Pool, error) {
@@ -22,6 +24,14 @@ func NewPool(connString string) (*pgxpool.Pool, error) {
 
 	err = pool.Ping(context.Background())
 	if err != nil {
+		return nil, err
+	}
+
+	// миграции
+	connConfig := poolConfig.ConnConfig
+	db := stdlib.OpenDB(*connConfig)
+
+	if err := goose.Up(db, "./migrations/postgres"); err != nil {
 		return nil, err
 	}
 

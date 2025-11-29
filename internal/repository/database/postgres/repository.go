@@ -50,6 +50,7 @@ func (r Repository) InsertUser(id, nickname, password string, createdAt time.Tim
 	return &user, nil
 }
 
+// TODO потом тут высрем quary params для сортировки братков
 func (r Repository) GetUsers() ([]*models.User, error) {
 	pp := "internal/database/postgres/repository/GetUsers"
 

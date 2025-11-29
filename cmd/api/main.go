@@ -8,10 +8,11 @@ import (
 	"github.com/alonsoF100/golos/internal/service"
 	"github.com/alonsoF100/golos/internal/transport/http/handlers"
 	"github.com/alonsoF100/golos/internal/transport/http/router"
+	_ "github.com/alonsoF100/golos/migrations/postgres"
 )
 
 const port = ":8080"
-const connString = "взять из докера"
+const connString = "postgresql://postgres:postgres@postgres:5432/golos?sslmode=disable"
 
 func main() {
 	// Создание pool-а
