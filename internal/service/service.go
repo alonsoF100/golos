@@ -19,6 +19,9 @@ type Repository interface {
 
 	CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error)
 	GetElections() ([]*models.Election, error)
+	GetElection(id string) (*models.Election, error)
+	DeleteElection(id string) error
+	PatchElection(id string, userID, name, description *string, updatedAt time.Time) (*models.Election, error)
 }
 
 type Service struct {
@@ -134,4 +137,36 @@ func (s Service) GetElections() ([]*models.Election, error) {
 	}
 
 	return elections, nil
+}
+
+func (s Service) GetElection(uuid string) (*models.Election, error) {
+	election, err := s.repository.GetElection(uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return election, nil
+}
+
+func (s Service) DeleteElection(uuid string) error {
+	err := s.repository.DeleteElection(uuid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s Service) PatchElection(uuid string, userID, name, description *string) (*models.Election, error) {
+	now := time.Now()
+	if userID == nil && name == nil && description == nil {
+		return nil, apperrors.ErrNothingToChange
+	}
+
+	election, err := s.repository.PatchElection(uuid, userID, name, description, now)
+	if err != nil {
+		return nil, err
+	}
+
+	return election, nil
 }

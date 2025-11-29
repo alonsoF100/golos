@@ -187,3 +187,24 @@ func (r Repository) PatchUser(id string, nickname, password *string, updatedAt t
 
 	return &user, nil
 }
+
+// TODO реализовать функциональность
+func (r Repository) CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error) {
+	return nil, nil
+}
+
+func (r Repository) GetElections() ([]*models.Election, error) {
+	return nil, nil
+}
+
+func (r Repository) GetElection(id string) (*models.Election, error) {
+	return nil, nil
+}
+
+func (r Repository) DeleteElection(id string) error {
+	return nil
+}
+
+func (r Repository) PatchElection(id string, userID, name, description *string, updatedAt time.Time) (*models.Election, error) {
+	return nil, nil
+}
