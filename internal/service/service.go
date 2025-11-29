@@ -17,11 +17,17 @@ type Repository interface {
 	DeleteUser(id string) error
 	PatchUser(id string, nickname, password *string, updatedAt time.Time) (*models.User, error)
 
-	CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error)
+	CreateElection(id, userID, name string, description *string, createdAt time.Time, updatedAt time.Time) (*models.Election, error)
 	GetElections() ([]*models.Election, error)
 	GetElection(id string) (*models.Election, error)
 	DeleteElection(id string) error
 	PatchElection(id string, userID, name, description *string, updatedAt time.Time) (*models.Election, error)
+
+	CreateVoteVariant(id, electionID, name string, createdAt time.Time, updatedAt time.Time) (*models.VoteVariant, error)
+	GetVoteVariants() ([]*models.VoteVariant, error)
+	GetVoteVariant(id string) (*models.VoteVariant, error)
+	DeleteVoteVariant(id string) error
+	UpdateVoteVariant(id, name string, updatedAt time.Time) (*models.VoteVariant, error)
 }
 
 type Service struct {
@@ -34,6 +40,7 @@ func New(repository Repository) *Service {
 	}
 }
 
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 	id := uuid.New().String()
 	now := time.Now()
@@ -118,6 +125,7 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 	return user, nil
 }
 
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 func (s Service) CreateElection(userID string, name string, description *string) (*models.Election, error) {
 	now := time.Now()
 	id := uuid.New().String()
@@ -170,3 +178,57 @@ func (s Service) PatchElection(uuid string, userID, name, description *string) (
 
 	return election, nil
 }
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant, error) {
+	now := time.Now()
+	id := uuid.New().String()
+
+	voteVariant, err := s.repository.CreateVoteVariant(id, electionID, name, now, now)
+	if err != nil {
+		return nil, err
+	}
+
+	return voteVariant, nil
+}
+
+func (s Service) GetVoteVariants() ([]*models.VoteVariant, error) {
+	voteVariants, err := s.repository.GetVoteVariants()
+	if err != nil {
+		return nil, err
+	}
+
+	return voteVariants, nil
+}
+
+func (s Service) GetVoteVariant(uuid string) (*models.VoteVariant, error) {
+	voteVariant, err := s.repository.GetVoteVariant(uuid)
+	if err != nil {
+		return nil, err
+	}
+
+	return voteVariant, nil
+}
+
+func (s Service) DeleteVoteVariant(uuid string) error {
+	err := s.repository.DeleteVoteVariant(uuid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s Service) UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error) {
+	now := time.Now()
+
+	voteVariant, err := s.repository.UpdateVoteVariant(uuid, name, now)
+	if err != nil {
+		return nil, err
+	}
+
+	return voteVariant, nil
+}
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//TODO votes потом сделаем

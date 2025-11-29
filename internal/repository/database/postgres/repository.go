@@ -188,6 +188,7 @@ func (r Repository) PatchUser(id string, nickname, password *string, updatedAt t
 	return &user, nil
 }
 
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO реализовать функциональность
 func (r Repository) CreateElection(id, userID, name string, description *string, updatedAt time.Time, createdAt time.Time) (*models.Election, error) {
 	return nil, nil
@@ -208,3 +209,28 @@ func (r Repository) DeleteElection(id string) error {
 func (r Repository) PatchElection(id string, userID, name, description *string, updatedAt time.Time) (*models.Election, error) {
 	return nil, nil
 }
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO реализовать функциональность
+func (r Repository) CreateVoteVariant(id, electionID, name string, createdAt time.Time, updatedAt time.Time) (*models.VoteVariant, error) {
+	return nil, nil
+}
+
+func (r Repository) GetVoteVariants() ([]*models.VoteVariant, error) {
+	return nil, nil
+}
+
+func (r Repository) GetVoteVariant(id string) (*models.VoteVariant, error) {
+	return nil, nil
+}
+
+func (r Repository) DeleteVoteVariant(id string) error {
+	return nil
+}
+
+func (r Repository) UpdateVoteVariant(id, name string, updatedAt time.Time) (*models.VoteVariant, error) {
+	return nil, nil
+}
+
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO реализовать функциональность
