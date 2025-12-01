@@ -21,11 +21,11 @@ type UserPatch struct {
 	Password *string `json:"password,omitempty" validate:"omitempty,min=5,max=20"`
 }
 
-//// elections dto
+// // elections dto
 type ElectionRequest struct {
-	UserID      string  `json:"user_id" validate:"required,uuid"`
-	Name        string  `json:"name" validate:"alphanum,min=3,max=50"`
-	Description *string `json:"description,omitempty" validate:"omitempty,min=3,max=100"`
+	UserID      string `json:"user_id" validate:"required,uuid"`
+	Name        string `json:"name" validate:"alphanum,min=3,max=50"`
+	Description string `json:"description" validate:"required,min=3,max=100"`
 }
 
 type ElectionID struct {
@@ -52,4 +52,8 @@ type VoteVariantID struct {
 type VoteVariantUpdate struct {
 	ID   string `json:"id" validate:"required,uuid"`
 	Name string `json:"name" validate:"required,alphanum,min=1,max=50"`
+}
+
+type GetVoteVariantsRequest struct {
+	ElectionID string `validate:"required,uuid"`
 }

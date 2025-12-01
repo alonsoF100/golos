@@ -29,5 +29,25 @@ func (rt Router) Setup() *chi.Mux {
 		})
 	})
 
+	r.Route("/golos/elections", func(r chi.Router) {
+		r.Post("/", rt.handlers.CreateElection)
+		r.Get("/", rt.handlers.GetElections)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", rt.handlers.GetElection)
+			r.Patch("/", rt.handlers.PatchElection)
+			r.Delete("/", rt.handlers.DeleteElection)
+		})
+	})
+
+	r.Route("/golos/vote_variants", func(r chi.Router) {
+		r.Post("/", rt.handlers.CreateVoteVariant)
+		r.Get("/", rt.handlers.GetVoteVariants)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", rt.handlers.GetVoteVariant)
+			r.Put("/", rt.handlers.UpdateVoteVariant)
+			r.Delete("/", rt.handlers.DeleteVoteVariant)
+		})
+	})
+
 	return r
 }

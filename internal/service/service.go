@@ -17,14 +17,14 @@ type Repository interface {
 	DeleteUser(id string) error
 	PatchUser(id string, nickname, password *string, updatedAt time.Time) (*models.User, error)
 
-	CreateElection(id, userID, name string, description *string, createdAt time.Time, updatedAt time.Time) (*models.Election, error)
+	CreateElection(id, userID, name string, description string, createdAt time.Time, updatedAt time.Time) (*models.Election, error)
 	GetElections() ([]*models.Election, error)
 	GetElection(id string) (*models.Election, error)
 	DeleteElection(id string) error
 	PatchElection(id string, userID, name, description *string, updatedAt time.Time) (*models.Election, error)
 
 	CreateVoteVariant(id, electionID, name string, createdAt time.Time, updatedAt time.Time) (*models.VoteVariant, error)
-	GetVoteVariants() ([]*models.VoteVariant, error)
+	GetVoteVariants(electionID string) ([]*models.VoteVariant, error)
 	GetVoteVariant(id string) (*models.VoteVariant, error)
 	DeleteVoteVariant(id string) error
 	UpdateVoteVariant(id, name string, updatedAt time.Time) (*models.VoteVariant, error)
@@ -126,8 +126,7 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// // проверить юзер айди что есть
-func (s Service) CreateElection(userID string, name string, description *string) (*models.Election, error) {
+func (s Service) CreateElection(userID string, name string, description string) (*models.Election, error) {
 	now := time.Now()
 	id := uuid.New().String()
 
@@ -181,8 +180,6 @@ func (s Service) PatchElection(uuid string, userID, name, description *string) (
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// // можем подумать как проверять что элекшн айди существует
 func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant, error) {
 	now := time.Now()
 	id := uuid.New().String()
@@ -196,8 +193,9 @@ func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant
 }
 
 // //cтранная функция вроде нелогичная, не забыть обсудить
-func (s Service) GetVoteVariants() ([]*models.VoteVariant, error) {
-	voteVariants, err := s.repository.GetVoteVariants()
+// добавить квэрипараметры
+func (s Service) GetVoteVariants(electionID string) ([]*models.VoteVariant, error) {
+	voteVariants, err := s.repository.GetVoteVariants(electionID)
 	if err != nil {
 		return nil, err
 	}

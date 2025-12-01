@@ -23,7 +23,7 @@ type Service interface {
 	PatchUser(uuid string, nickname, password *string) (*models.User, error)
 
 	// Election methods
-	CreateElection(userID string, name string, description *string) (*models.Election, error)
+	CreateElection(userID string, name string, description string) (*models.Election, error)
 	GetElections() ([]*models.Election, error)
 	GetElection(uuid string) (*models.Election, error)
 	DeleteElection(uuid string) error
@@ -31,7 +31,7 @@ type Service interface {
 
 	// Vote Variant methods
 	CreateVoteVariant(electionID, name string) (*models.VoteVariant, error)
-	GetVoteVariants() ([]*models.VoteVariant, error)
+	GetVoteVariants(electionID string) ([]*models.VoteVariant, error)
 	GetVoteVariant(uuid string) (*models.VoteVariant, error)
 	DeleteVoteVariant(uuid string) error
 	UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error)
@@ -56,6 +56,8 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 		fmt.Printf("error: %v, time: %v\n", err.Error(), time.Now())
 	}
 }
+
+// User Handlers //
 
 /*
 pattern: /golos/users
@@ -310,6 +312,8 @@ func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
 	WriteJSON(w, http.StatusOK, dto.NewUserResponse(user))
 }
 
+// Election Handlers //
+
 /*
 pattern: /golos/elections
 method:  POST
@@ -495,7 +499,7 @@ func (h *Handler) PatchElection(w http.ResponseWriter, r *http.Request) {
 // Vote Variant Handlers //
 
 /*
-pattern: /golos/vote-variants
+pattern: /golos/vote_variants
 method:  POST
 info:    JSON in request body
 
@@ -537,7 +541,7 @@ func (h *Handler) CreateVoteVariant(w http.ResponseWriter, r *http.Request) {
 /*
 pattern: /golos/vote-variants
 method:  GET
-info:    -
+info:    electionID from query
 
 succeed:
   - status code:   200 ok
@@ -548,7 +552,16 @@ failed:
   - response body: JSON with error + time
 */
 func (h *Handler) GetVoteVariants(w http.ResponseWriter, r *http.Request) {
-	voteVariants, err := h.service.GetVoteVariants()
+	var req dto.GetVoteVariantsRequest
+	query := r.URL.Query()
+	req.ElectionID = query.Get("election_id")
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	voteVariants, err := h.service.GetVoteVariants(req.ElectionID)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
 		return
@@ -558,7 +571,7 @@ func (h *Handler) GetVoteVariants(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/vote-variants/{id}
+pattern: /golos/vote_variants/{id}
 method:  GET
 info:    UUID from pattern
 
@@ -595,7 +608,7 @@ func (h *Handler) GetVoteVariant(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/vote-variants/{id}
+pattern: /golos/vote_variants/{id}
 method:  DELETE
 info:    UUID from pattern
 
@@ -632,7 +645,7 @@ func (h *Handler) DeleteVoteVariant(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/vote-variants/{id}
+pattern: /golos/vote_variants/{id}
 method:  PUT
 info:    UUID from pattern + JSON in request body
 
