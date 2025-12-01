@@ -126,6 +126,7 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// // проверить юзер айди что есть
 func (s Service) CreateElection(userID string, name string, description *string) (*models.Election, error) {
 	now := time.Now()
 	id := uuid.New().String()
@@ -180,6 +181,8 @@ func (s Service) PatchElection(uuid string, userID, name, description *string) (
 }
 
 // ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// // можем подумать как проверять что элекшн айди существует
 func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant, error) {
 	now := time.Now()
 	id := uuid.New().String()
@@ -192,6 +195,7 @@ func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant
 	return voteVariant, nil
 }
 
+// //cтранная функция вроде нелогичная, не забыть обсудить
 func (s Service) GetVoteVariants() ([]*models.VoteVariant, error) {
 	voteVariants, err := s.repository.GetVoteVariants()
 	if err != nil {

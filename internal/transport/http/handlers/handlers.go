@@ -14,15 +14,27 @@ import (
 )
 
 type Service interface {
+	// User methods
 	CreateUser(nickname, password string) (*models.User, error)
-
-	// TODO потом тут высрем quary params для сортировки братков
 	GetUsers() ([]*models.User, error)
-
 	GetUser(uuid string) (*models.User, error)
 	UpdateUser(uuid, nickname, password string) (*models.User, error)
 	DeleteUser(uuid string) error
 	PatchUser(uuid string, nickname, password *string) (*models.User, error)
+
+	// Election methods
+	CreateElection(userID string, name string, description *string) (*models.Election, error)
+	GetElections() ([]*models.Election, error)
+	GetElection(uuid string) (*models.Election, error)
+	DeleteElection(uuid string) error
+	PatchElection(uuid string, userID, name, description *string) (*models.Election, error)
+
+	// Vote Variant methods
+	CreateVoteVariant(electionID, name string) (*models.VoteVariant, error)
+	GetVoteVariants() ([]*models.VoteVariant, error)
+	GetVoteVariant(uuid string) (*models.VoteVariant, error)
+	DeleteVoteVariant(uuid string) error
+	UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error)
 }
 
 type Handler struct {
@@ -304,14 +316,12 @@ method:  POST
 info:    JSON in request body
 
 succeed:
-
-	-status code:   201 created
-	-response body: JSON represented created election
+  - status code:   201 created
+  - response body: JSON represented created election
 
 failed:
-
-	-status code:   400, 409, 500
-	-response body: JSON with error + time
+  - status code:   400, 409, 500
+  - response body: JSON with error + time
 */
 func (h *Handler) CreateElection(w http.ResponseWriter, r *http.Request) {
 	var req dto.ElectionRequest
@@ -325,10 +335,10 @@ func (h *Handler) CreateElection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	election, err := h.service.Create(req.Nickname, req.Password)
+	election, err := h.service.CreateElection(req.UserID, req.Name, req.Description)
 	if err != nil {
 		switch err {
-		case apperrors.ErrUserAlreadyExist:
+		case apperrors.ErrElectionAlreadyExist:
 			WriteJSON(w, http.StatusConflict, dto.NewErrorResponse(err))
 			return
 		default:
@@ -337,5 +347,328 @@ func (h *Handler) CreateElection(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	WriteJSON(w, http.StatusCreated, dto.(election))
+	WriteJSON(w, http.StatusCreated, dto.NewElectionResponse(election))
+}
+
+/*
+pattern: /golos/elections
+method:  GET
+info:    -
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented elections
+
+failed:
+  - status code:   500
+  - response body: JSON with error + time
+*/
+func (h *Handler) GetElections(w http.ResponseWriter, r *http.Request) {
+	elections, err := h.service.GetElections()
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+		return
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewElectionsResponse(elections))
+}
+
+/*
+pattern: /golos/elections/{id}
+method:  GET
+info:    UUID from pattern
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented election
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) GetElection(w http.ResponseWriter, r *http.Request) {
+	var req dto.ElectionID
+	req.ID = chi.URLParam(r, "id")
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	election, err := h.service.GetElection(req.ID)
+	if err != nil {
+		switch err {
+		case apperrors.ErrElectionNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewElectionResponse(election))
+}
+
+/*
+pattern: /golos/elections/{id}
+method:  DELETE
+info:    UUID from pattern
+
+succeed:
+  - status code:   204 no content
+  - response body: -
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) DeleteElection(w http.ResponseWriter, r *http.Request) {
+	var req dto.ElectionID
+	req.ID = chi.URLParam(r, "id")
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	err := h.service.DeleteElection(req.ID)
+	if err != nil {
+		switch err {
+		case apperrors.ErrElectionNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusNoContent, nil)
+}
+
+/*
+pattern: /golos/elections/{id}
+method:  PATCH
+info:    UUID from pattern + JSON in request body
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented updated election
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) PatchElection(w http.ResponseWriter, r *http.Request) {
+	var req dto.ElectionPatch
+	req.ID = chi.URLParam(r, "id")
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	election, err := h.service.PatchElection(req.ID, req.UserID, req.Name, req.Description)
+	if err != nil {
+		switch err {
+		case apperrors.ErrElectionNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		case apperrors.ErrNothingToChange:
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewElectionResponse(election))
+}
+
+// Vote Variant Handlers //
+
+/*
+pattern: /golos/vote-variants
+method:  POST
+info:    JSON in request body
+
+succeed:
+  - status code:   201 created
+  - response body: JSON represented created vote variant
+
+failed:
+  - status code:   400, 409, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) CreateVoteVariant(w http.ResponseWriter, r *http.Request) {
+	var req dto.VoteVariantRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	voteVariant, err := h.service.CreateVoteVariant(req.ElectionID, req.Name)
+	if err != nil {
+		switch err {
+		case apperrors.ErrVoteVariantAlreadyExist:
+			WriteJSON(w, http.StatusConflict, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusCreated, dto.NewVoteVariantResponse(voteVariant))
+}
+
+/*
+pattern: /golos/vote-variants
+method:  GET
+info:    -
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented vote variants
+
+failed:
+  - status code:   500
+  - response body: JSON with error + time
+*/
+func (h *Handler) GetVoteVariants(w http.ResponseWriter, r *http.Request) {
+	voteVariants, err := h.service.GetVoteVariants()
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+		return
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewVoteVariantsResponse(voteVariants))
+}
+
+/*
+pattern: /golos/vote-variants/{id}
+method:  GET
+info:    UUID from pattern
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented vote variant
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) GetVoteVariant(w http.ResponseWriter, r *http.Request) {
+	var req dto.VoteVariantID
+	req.ID = chi.URLParam(r, "id")
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	voteVariant, err := h.service.GetVoteVariant(req.ID)
+	if err != nil {
+		switch err {
+		case apperrors.ErrVoteVariantNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewVoteVariantResponse(voteVariant))
+}
+
+/*
+pattern: /golos/vote-variants/{id}
+method:  DELETE
+info:    UUID from pattern
+
+succeed:
+  - status code:   204 no content
+  - response body: -
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) DeleteVoteVariant(w http.ResponseWriter, r *http.Request) {
+	var req dto.VoteVariantID
+	req.ID = chi.URLParam(r, "id")
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	err := h.service.DeleteVoteVariant(req.ID)
+	if err != nil {
+		switch err {
+		case apperrors.ErrVoteVariantNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusNoContent, nil)
+}
+
+/*
+pattern: /golos/vote-variants/{id}
+method:  PUT
+info:    UUID from pattern + JSON in request body
+
+succeed:
+  - status code:   200 ok
+  - response body: JSON represented updated vote variant
+
+failed:
+  - status code:   400, 404, 500
+  - response body: JSON with error + time
+*/
+func (h *Handler) UpdateVoteVariant(w http.ResponseWriter, r *http.Request) {
+	var req dto.VoteVariantUpdate
+	req.ID = chi.URLParam(r, "id")
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	voteVariant, err := h.service.UpdateVoteVariant(req.ID, req.Name)
+	if err != nil {
+		switch err {
+		case apperrors.ErrVoteVariantNotFound:
+			WriteJSON(w, http.StatusNotFound, dto.NewErrorResponse(err))
+			return
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewVoteVariantResponse(voteVariant))
 }
