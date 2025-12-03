@@ -35,7 +35,7 @@ type Repository interface {
 	GetUserVotes(userID string) ([]*models.Vote, error)
 	GetVariantVotes(voteVariantID string) ([]*models.Vote, error)
 	DeleteVote(uuid string) error
-	PathVote(uuid string, userID, voteVariantID *string, updatedAt time.Time) (*models.Vote, error)
+	PatchVote(uuid string, userID, voteVariantID *string, updatedAt time.Time) (*models.Vote, error)
 }
 
 type Service struct {

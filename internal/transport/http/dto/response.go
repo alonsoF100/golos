@@ -141,3 +141,21 @@ func NewVoteVariantsResponse(voteVariants []*models.VoteVariant) VoteVariantsRes
 	}
 	return responseVariants
 }
+
+type VoteResponse struct {
+	ID        string    `json:"id"`
+	VariantID string    `json:"variant_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func NewVoteResponse(vote *models.Vote) VoteResponse {
+	return VoteResponse{
+		ID:        vote.ID,
+		VariantID: vote.VariantID,
+		UserID:    vote.UserID,
+		CreatedAt: vote.CreatedAt,
+		UpdatedAt: vote.UpdatedAt,
+	}
+}
