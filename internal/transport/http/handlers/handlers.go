@@ -11,7 +11,7 @@ import (
 )
 
 type Service interface {
-	// User methods
+	// User service methods
 	CreateUser(nickname, password string) (*models.User, error)
 	GetUsers() ([]*models.User, error)
 	GetUser(uuid string) (*models.User, error)
@@ -19,19 +19,27 @@ type Service interface {
 	DeleteUser(uuid string) error
 	PatchUser(uuid string, nickname, password *string) (*models.User, error)
 
-	// Election methods
+	// Election service methods
 	CreateElection(userID string, name string, description string) (*models.Election, error)
 	GetElections() ([]*models.Election, error)
 	GetElection(uuid string) (*models.Election, error)
 	DeleteElection(uuid string) error
 	PatchElection(uuid string, userID, name, description *string) (*models.Election, error)
 
-	// Vote Variant methods
+	// Vote-variant service methods
 	CreateVoteVariant(electionID, name string) (*models.VoteVariant, error)
 	GetVoteVariants(electionID string) ([]*models.VoteVariant, error)
 	GetVoteVariant(uuid string) (*models.VoteVariant, error)
 	DeleteVoteVariant(uuid string) error
 	UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error)
+
+	// Vote service methods
+	CreateVote(userID, voteVariantID string) (*models.Vote, error)
+	GetVote(voteID string) (*models.Vote, error)
+	GetUserVotes(userID string) (*[]models.Vote, error)
+	GetVariantVotes(voteVariantID string) (*[]models.Vote, error)
+	DeleteVote(voteID string) error
+	PatchVote(voteID string, userID, voteVariantID *string) (*models.Vote, error)
 }
 
 type Handler struct {
