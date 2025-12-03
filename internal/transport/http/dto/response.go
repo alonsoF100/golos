@@ -59,7 +59,7 @@ func NewUsersResponse(users []*models.User) UsersResponse {
 	return responseUsers
 }
 
-// // election dto
+// election dto
 type ElectionResponse struct {
 	ID          string    `json:"id"`
 	UserID      string    `json:"user_id"`

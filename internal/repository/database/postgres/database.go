@@ -8,6 +8,16 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
+type Repository struct {
+	pool *pgxpool.Pool
+}
+
+func New(pool *pgxpool.Pool) *Repository {
+	return &Repository{
+		pool: pool,
+	}
+}
+
 func NewPool(connString string) (*pgxpool.Pool, error) {
 
 	poolConfig, err := pgxpool.ParseConfig(connString)

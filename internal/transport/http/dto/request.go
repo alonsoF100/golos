@@ -21,7 +21,7 @@ type UserPatch struct {
 	Password *string `json:"password,omitempty" validate:"omitempty,min=5,max=20"`
 }
 
-// // elections dto
+// elections dto
 type ElectionRequest struct {
 	UserID      string `json:"user_id" validate:"required,uuid"`
 	Name        string `json:"name" validate:"alphanum,min=3,max=50"`
