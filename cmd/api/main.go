@@ -1,10 +1,11 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/alonsoF100/golos/internal/config"
+	"github.com/alonsoF100/golos/internal/logger"
 	"github.com/alonsoF100/golos/internal/repository/database/postgres"
 	"github.com/alonsoF100/golos/internal/service"
 	"github.com/alonsoF100/golos/internal/transport/http/handlers"
@@ -16,12 +17,16 @@ func main() {
 	// Инициализация конфига
 	config := config.Load()
 
+	// Создание looger-а
+	logger.Setup(config)
+
 	// Создание pool-а
 	pool, err := postgres.NewPool(config)
 	if err != nil {
-		log.Fatal("failed to pool")
+		slog.Error("Failed to create pool", "error", err)
 	}
 	defer pool.Close()
+	slog.Info("Pool created successfully")
 
 	// Создание слоя repo
 	dataBase := postgres.New(pool)

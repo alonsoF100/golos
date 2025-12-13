@@ -30,6 +30,7 @@ type DatabaseConfig struct {
 
 type LoggerConfig struct {
 	Level string `mapstructure:"level"`
+	JSON  bool   `mapstructure:"json"`
 }
 
 type MigrationConfig struct {

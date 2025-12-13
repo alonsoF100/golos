@@ -13,7 +13,8 @@ database:
   ssl_mode: disable
 
 logger:
- level: "debug"
+  level: "debug"
+  json: false
 
 migrations: 
   dir: "migrations/postgres"
