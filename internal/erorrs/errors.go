@@ -16,7 +16,8 @@ var (
 	// Vote Variant errors
 	ErrVoteVariantAlreadyExist = errors.New("vote variant already exist")
 	ErrVoteVariantNotFound     = errors.New("vote variant not found")
+
 	// vote errors
-	ErrVoteAlreadyExist = errors.New("Vote Already Exist")
+	ErrVoteAlreadyExist = errors.New("vote Already Exist")
 	ErrVoteNotFound     = errors.New("vote not found")
 )
