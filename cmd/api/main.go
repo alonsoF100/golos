@@ -32,10 +32,15 @@ func main() {
 	dataBase := postgres.New(pool)
 
 	// Создание слоя service
-	service := service.New(dataBase)
+	svc := service.New(
+		dataBase, // user repo
+		dataBase, // election repo
+		dataBase, // voteVariat repo
+		dataBase, // vote repo
+	)
 
 	// Создание слоя http
-	handler := handlers.New(service)
+	handler := handlers.New(svc)
 
 	// Сетап router-а
 	router := router.New(handler).Setup()
@@ -50,5 +55,8 @@ func main() {
 	}
 
 	// Запуск сервера
-	server.ListenAndServe()
+	slog.Info("Starting server", "port", config.Server.Port)
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		slog.Error("Server failed", "error", err)
+	}
 }

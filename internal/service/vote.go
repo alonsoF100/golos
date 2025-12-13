@@ -8,11 +8,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) CreateVote(userID, voteVariantID string) (*models.Vote, error) {
+func (s VoteService) CreateVote(userID, voteVariantID string) (*models.Vote, error) {
 	id := uuid.New().String()
 	now := time.Now()
 
-	vote, err := s.repository.CreateVote(id, userID, voteVariantID, now, now)
+	vote, err := s.voteRepository.CreateVote(id, userID, voteVariantID, now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -20,8 +20,8 @@ func (s Service) CreateVote(userID, voteVariantID string) (*models.Vote, error) 
 	return vote, nil
 }
 
-func (s Service) GetVote(voteID string) (*models.Vote, error) {
-	vote, err := s.repository.GetVote(voteID)
+func (s VoteService) GetVote(voteID string) (*models.Vote, error) {
+	vote, err := s.voteRepository.GetVote(voteID)
 	if err != nil {
 		return nil, err
 	}
@@ -29,16 +29,16 @@ func (s Service) GetVote(voteID string) (*models.Vote, error) {
 	return vote, nil
 }
 
-func (s Service) GetUserVotes(userID string) (*[]models.Vote, error) {
+func (s VoteService) GetUserVotes(userID string) (*[]models.Vote, error) {
 	return nil, nil
 }
 
-func (s Service) GetVariantVotes(voteVariantID string) (*[]models.Vote, error) {
+func (s VoteService) GetVariantVotes(voteVariantID string) (*[]models.Vote, error) {
 	return nil, nil
 }
 
-func (s Service) DeleteVote(voteID string) error {
-	err := s.repository.DeleteVote(voteID)
+func (s VoteService) DeleteVote(voteID string) error {
+	err := s.voteRepository.DeleteVote(voteID)
 	if err != nil {
 		return err
 	}
@@ -46,14 +46,14 @@ func (s Service) DeleteVote(voteID string) error {
 	return nil
 }
 
-func (s Service) PatchVote(voteID string, userID, voteVariantID *string) (*models.Vote, error) {
+func (s VoteService) PatchVote(voteID string, userID, voteVariantID *string) (*models.Vote, error) {
 	now := time.Now()
 
 	if userID == nil && voteVariantID == nil {
 		return nil, apperrors.ErrNothingToChange
 	}
 
-	vote, err := s.repository.PatchVote(voteID, userID, voteVariantID, now)
+	vote, err := s.voteRepository.PatchVote(voteID, userID, voteVariantID, now)
 	if err != nil {
 		return nil, err
 	}

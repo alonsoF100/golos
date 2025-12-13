@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant, error) {
+func (s VoteVariantService) CreateVoteVariant(electionID, name string) (*models.VoteVariant, error) {
 	now := time.Now()
 	id := uuid.New().String()
 
-	voteVariant, err := s.repository.CreateVoteVariant(id, electionID, name, now, now)
+	voteVariant, err := s.voteVariantRepository.CreateVoteVariant(id, electionID, name, now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -19,10 +19,8 @@ func (s Service) CreateVoteVariant(electionID, name string) (*models.VoteVariant
 	return voteVariant, nil
 }
 
-// //cтранная функция вроде нелогичная, не забыть обсудить
-// добавить квэрипараметры
-func (s Service) GetVoteVariants(electionID string) ([]*models.VoteVariant, error) {
-	voteVariants, err := s.repository.GetVoteVariants(electionID)
+func (s VoteVariantService) GetVoteVariants(electionID string) ([]*models.VoteVariant, error) {
+	voteVariants, err := s.voteVariantRepository.GetVoteVariants(electionID)
 	if err != nil {
 		return nil, err
 	}
@@ -30,8 +28,8 @@ func (s Service) GetVoteVariants(electionID string) ([]*models.VoteVariant, erro
 	return voteVariants, nil
 }
 
-func (s Service) GetVoteVariant(uuid string) (*models.VoteVariant, error) {
-	voteVariant, err := s.repository.GetVoteVariant(uuid)
+func (s VoteVariantService) GetVoteVariant(uuid string) (*models.VoteVariant, error) {
+	voteVariant, err := s.voteVariantRepository.GetVoteVariant(uuid)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +37,8 @@ func (s Service) GetVoteVariant(uuid string) (*models.VoteVariant, error) {
 	return voteVariant, nil
 }
 
-func (s Service) DeleteVoteVariant(uuid string) error {
-	err := s.repository.DeleteVoteVariant(uuid)
+func (s VoteVariantService) DeleteVoteVariant(uuid string) error {
+	err := s.voteVariantRepository.DeleteVoteVariant(uuid)
 	if err != nil {
 		return err
 	}
@@ -48,10 +46,10 @@ func (s Service) DeleteVoteVariant(uuid string) error {
 	return nil
 }
 
-func (s Service) UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error) {
+func (s VoteVariantService) UpdateVoteVariant(uuid string, name string) (*models.VoteVariant, error) {
 	now := time.Now()
 
-	voteVariant, err := s.repository.UpdateVoteVariant(uuid, name, now)
+	voteVariant, err := s.voteVariantRepository.UpdateVoteVariant(uuid, name, now)
 	if err != nil {
 		return nil, err
 	}

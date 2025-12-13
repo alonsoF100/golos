@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s Service) CreateUser(nickname, password string) (*models.User, error) {
+func (s UserService) CreateUser(nickname, password string) (*models.User, error) {
 	id := uuid.New().String()
 	now := time.Now()
 
@@ -18,7 +18,7 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 		return nil, apperrors.ErrFailedToHashPassword
 	}
 
-	user, err := s.repository.CreateUser(id, nickname, string(hashedPassword), now, now)
+	user, err := s.userRepository.CreateUser(id, nickname, string(hashedPassword), now, now)
 	if err != nil {
 		return nil, err
 	}
@@ -26,11 +26,11 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 	return user, nil
 }
 
-func (s Service) GetUsers(limit, offset int) ([]*models.User, error) {
+func (s UserService) GetUsers(limit, offset int) ([]*models.User, error) {
 	validLimit := validateLimit(limit)
 	validOffset := validateOffset(offset)
 
-	users, err := s.repository.GetUsers(validLimit, validOffset)
+	users, err := s.userRepository.GetUsers(validLimit, validOffset)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,8 @@ func (s Service) GetUsers(limit, offset int) ([]*models.User, error) {
 	return users, nil
 }
 
-func (s Service) GetUser(uuid string) (*models.User, error) {
-	user, err := s.repository.GetUser(uuid)
+func (s UserService) GetUser(uuid string) (*models.User, error) {
+	user, err := s.userRepository.GetUser(uuid)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (s Service) GetUser(uuid string) (*models.User, error) {
 	return user, nil
 }
 
-func (s Service) UpdateUser(uuid, nickname, password string) (*models.User, error) {
+func (s UserService) UpdateUser(uuid, nickname, password string) (*models.User, error) {
 	now := time.Now()
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -55,7 +55,7 @@ func (s Service) UpdateUser(uuid, nickname, password string) (*models.User, erro
 		return nil, apperrors.ErrFailedToHashPassword
 	}
 
-	user, err := s.repository.UpdateUser(uuid, nickname, string(hashedPassword), now)
+	user, err := s.userRepository.UpdateUser(uuid, nickname, string(hashedPassword), now)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +63,8 @@ func (s Service) UpdateUser(uuid, nickname, password string) (*models.User, erro
 	return user, nil
 }
 
-func (s Service) DeleteUser(uuid string) error {
-	err := s.repository.DeleteUser(uuid)
+func (s UserService) DeleteUser(uuid string) error {
+	err := s.userRepository.DeleteUser(uuid)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (s Service) DeleteUser(uuid string) error {
 	return nil
 }
 
-func (s Service) PatchUser(uuid string, nickname, password *string) (*models.User, error) {
+func (s UserService) PatchUser(uuid string, nickname, password *string) (*models.User, error) {
 	now := time.Now()
 	if nickname == nil && password == nil {
 		return nil, apperrors.ErrNothingToChange
@@ -88,7 +88,7 @@ func (s Service) PatchUser(uuid string, nickname, password *string) (*models.Use
 		hashedPassword = &hashedStr
 	}
 
-	user, err := s.repository.PatchUser(uuid, nickname, hashedPassword, now)
+	user, err := s.userRepository.PatchUser(uuid, nickname, hashedPassword, now)
 	if err != nil {
 		return nil, err
 	}
