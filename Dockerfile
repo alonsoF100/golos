@@ -15,7 +15,9 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 
 COPY --from=builder /app/golos .
+COPY --from=builder /app/config.yaml .   
 COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/.env .env
 
 EXPOSE 8080
 

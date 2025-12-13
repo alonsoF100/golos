@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/alonsoF100/golos/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -18,9 +19,8 @@ func New(pool *pgxpool.Pool) *Repository {
 	}
 }
 
-func NewPool(connString string) (*pgxpool.Pool, error) {
-
-	poolConfig, err := pgxpool.ParseConfig(connString)
+func NewPool(cfg *config.Config) (*pgxpool.Pool, error) {
+	poolConfig, err := pgxpool.ParseConfig(cfg.Database.ConStr())
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +37,9 @@ func NewPool(connString string) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	// миграции
 	connConfig := poolConfig.ConnConfig
 	db := stdlib.OpenDB(*connConfig)
-
-	if err := goose.Up(db, "./migrations/postgres"); err != nil {
+	if err := goose.Up(db, cfg.Migration.Dir); err != nil {
 		return nil, err
 	}
 

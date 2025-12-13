@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alonsoF100/golos/internal/config"
 	"github.com/alonsoF100/golos/internal/repository/database/postgres"
 	"github.com/alonsoF100/golos/internal/service"
 	"github.com/alonsoF100/golos/internal/transport/http/handlers"
@@ -11,12 +12,12 @@ import (
 	_ "github.com/alonsoF100/golos/migrations/postgres"
 )
 
-const port = ":8080"
-const connString = "postgresql://postgres:postgres@postgres:5432/golos?sslmode=disable"
-
 func main() {
+	// Инициализация конфига
+	config := config.Load()
+
 	// Создание pool-а
-	pool, err := postgres.NewPool(connString)
+	pool, err := postgres.NewPool(config)
 	if err != nil {
 		log.Fatal("failed to pool")
 	}
@@ -32,8 +33,17 @@ func main() {
 	handler := handlers.New(service)
 
 	// Сетап router-а
-	router := router.New(handler)
+	router := router.New(handler).Setup()
+
+	// Сетап сервера // TODO потом отдельный файл сделать с сетапом
+	server := &http.Server{
+		Addr:         config.Server.PortStr(),
+		Handler:      router,
+		ReadTimeout:  config.Server.ReadTimeout,
+		WriteTimeout: config.Server.WriteTimeout,
+		IdleTimeout:  config.Server.IdleTimeout,
+	}
 
 	// Запуск сервера
-	http.ListenAndServe(port, router.Setup())
+	server.ListenAndServe()
 }

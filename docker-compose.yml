@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_DB: golos
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports: 
       - "5432:5432"
     volumes: 
       - golos_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
       interval: 3s
       timeout: 3s
       retries: 5
@@ -27,16 +27,17 @@ services:
 
   app:
     build:
-      context: ..
-      dockerfile: deployments/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_NAME=golos
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SSL_MODE=${DB_SSL_MODE}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
