@@ -108,12 +108,12 @@ func (s Service) GetElections(limit, offset int, nickname string) ([]*models.Ele
 	validateLimit := validateLimit(limit)
 	validateOffset := validateOffset(offset)
 
-	user, err := s.userRepository.GetUserByNickname(nickname)
+	user, err := s.UserService.userRepository.GetUserByNickname(nickname)
 	if err != nil {
 		return nil, apperrors.ErrUserNotFound
 	}
 
-	elections, err := s.electionRepository.GetElections(validateLimit, validateOffset, user.ID)
+	elections, err := s.ElectionService.electionRepository.GetElections(validateLimit, validateOffset, user.ID)
 	if err != nil {
 		return nil, err
 	}
