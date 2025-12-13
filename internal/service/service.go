@@ -3,14 +3,8 @@ package service
 import (
 	"time"
 
-	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/alonsoF100/golos/internal/repository/database/postgres"
-)
-
-const (
-	maxLimit     = 100
-	defaultLimit = 20
 )
 
 type UserRepository interface {
@@ -102,39 +96,4 @@ func New(userRepo, electionRepo, voteVariantRepo, voteRepo *postgres.Repository)
 		VoteVariantService: NewVoteVariant(voteVariantRepo),
 		VoteService:        NewVote(voteRepo),
 	}
-}
-
-func (s Service) GetElections(limit, offset int, nickname string) ([]*models.Election, error) {
-	validateLimit := validateLimit(limit)
-	validateOffset := validateOffset(offset)
-
-	user, err := s.UserService.userRepository.GetUserByNickname(nickname)
-	if err != nil {
-		return nil, apperrors.ErrUserNotFound
-	}
-
-	elections, err := s.ElectionService.electionRepository.GetElections(validateLimit, validateOffset, user.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	return elections, nil
-}
-
-func validateLimit(limit int) int {
-	if limit <= 0 {
-		return defaultLimit
-	}
-	if limit > maxLimit {
-		return maxLimit
-	}
-	return limit
-}
-
-func validateOffset(offset int) int {
-	if offset < 0 {
-		return 0
-	}
-
-	return offset
 }
