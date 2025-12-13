@@ -26,7 +26,8 @@ type ElectionService interface {
 	PatchElection(uuid string, userID, name, description *string) (*models.Election, error)
 }
 
-type ElectionQueryService interface {
+// Интерфейс для кросс-доменных операций
+type Facade interface {
 	GetElections(limit, offset int, nickname string) ([]*models.Election, error)
 }
 
@@ -50,7 +51,7 @@ type VoteService interface {
 type Service interface {
 	UserService
 	ElectionService
-	ElectionQueryService
+	Facade
 	VoteVariantService
 	VoteService
 }
