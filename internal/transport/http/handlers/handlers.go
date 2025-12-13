@@ -1,11 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/alonsoF100/golos/internal/models"
 	"github.com/go-playground/validator/v10"
 )
@@ -65,13 +60,5 @@ func New(service Service) *Handler {
 	return &Handler{
 		service:   service,
 		validator: validator.New(),
-	}
-}
-
-func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		fmt.Printf("error: %v, time: %v\n", err.Error(), time.Now())
 	}
 }
