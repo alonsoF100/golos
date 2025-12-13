@@ -13,7 +13,7 @@ import (
 type Service interface {
 	// User service methods
 	CreateUser(nickname, password string) (*models.User, error)
-	GetUsers() ([]*models.User, error)
+	GetUsers(limit, offset int) ([]*models.User, error)
 	GetUser(uuid string) (*models.User, error)
 	UpdateUser(uuid, nickname, password string) (*models.User, error)
 	DeleteUser(uuid string) error
@@ -21,7 +21,7 @@ type Service interface {
 
 	// Election service methods
 	CreateElection(userID string, name string, description string) (*models.Election, error)
-	GetElections() ([]*models.Election, error)
+	GetElections(limit, offset int, nickname string) ([]*models.Election, error)
 	GetElection(uuid string) (*models.Election, error)
 	DeleteElection(uuid string) error
 	PatchElection(uuid string, userID, name, description *string) (*models.Election, error)

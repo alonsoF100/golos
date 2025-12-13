@@ -26,8 +26,11 @@ func (s Service) CreateUser(nickname, password string) (*models.User, error) {
 	return user, nil
 }
 
-func (s Service) GetUsers() ([]*models.User, error) {
-	users, err := s.repository.GetUsers()
+func (s Service) GetUsers(limit, offset int) ([]*models.User, error) {
+	validLimit := validateLimit(limit)
+	validOffset := validateOffset(offset)
+
+	users, err := s.repository.GetUsers(validLimit, validOffset)
 	if err != nil {
 		return nil, err
 	}

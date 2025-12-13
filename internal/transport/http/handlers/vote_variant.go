@@ -50,7 +50,7 @@ func (h *Handler) CreateVoteVariant(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/vote-variants
+pattern: /golos/vote-variants?election_id=elelnslksvmnspvmopsevmpoesvm
 method:  GET
 info:    electionID from query
 

@@ -43,14 +43,26 @@ func (r Repository) CreateElection(id, userID, name string, description string, 
 }
 
 // TODO потом тут высрем quary params для сортировки
-func (r Repository) GetElections() ([]*models.Election, error) {
+func (r Repository) GetElections(limit, offset int, userID string) ([]*models.Election, error) {
 	pp := "internal/database/postgres/repository/GetElections"
 
-	const query = `
-	SELECT id, user_id, name, description, created_at, updated_at
-	FROM elections`
+	qb := squirrel.
+		Select("id", "user_id", "name", "description", "created_at", "updated_at").
+		From("elections")
+	if userID != "" {
+		qb = qb.Where(squirrel.Eq{"user_id": userID})
+	}
+	query, args, err := qb.
+		OrderBy("created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
 
-	rows, err := r.pool.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("%s: error: %w", pp, err)
 	}

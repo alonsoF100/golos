@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/transport/http/dto"
@@ -50,9 +51,9 @@ func (h *Handler) CreateElection(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/elections
+pattern: /golos/elections?limit=20&offset=0&nickname=alonso
 method:  GET
-info:    -
+info:    query (limit, offset, nickname)
 
 succeed:
   - status code:   200 ok
@@ -63,7 +64,23 @@ failed:
   - response body: JSON with error + time
 */
 func (h *Handler) GetElections(w http.ResponseWriter, r *http.Request) {
-	elections, err := h.service.GetElections()
+	query := r.URL.Query()
+
+	limitStr := query.Get("limit")
+	offsetStr := query.Get("offset")
+	nickName := query.Get("nickname")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		limit = 10
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		offset = 0
+	}
+
+	elections, err := h.service.GetElections(limit, offset, nickName)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
 		return

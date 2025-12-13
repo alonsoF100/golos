@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/transport/http/dto"
@@ -52,9 +53,9 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-pattern: /golos/users
+pattern: /golos/users?limit=20&offset=20
 method:  GET
-info:    -
+info:    query (limit, offset)
 
 succeed:
 
@@ -67,7 +68,22 @@ failed:
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.service.GetUsers()
+	query := r.URL.Query()
+
+	limitStr := query.Get("limit")
+	offsetStr := query.Get("offset")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		limit = 10
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		offset = 0
+	}
+
+	users, err := h.service.GetUsers(limit, offset)
 
 	if err != nil {
 		switch err {
@@ -76,7 +92,7 @@ func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	WriteJSON(w, http.StatusOK, dto.NewUsersResponse(users))
 }
 
@@ -99,12 +115,12 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.UserID
 
 	req.ID = chi.URLParam(r, "id")
-	
+
 	if err := h.validator.Struct(req); err != nil {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
 	}
-	
+
 	user, err := h.service.GetUser(req.ID)
 	if err != nil {
 		switch err {
@@ -149,7 +165,7 @@ func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
 	}
-	
+
 	user, err := h.service.UpdateUser(req.ID, req.Nickname, req.Password)
 	if err != nil {
 		switch err {
@@ -182,14 +198,14 @@ failed:
 */
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.UserID
-	
+
 	req.ID = chi.URLParam(r, "id")
 
 	if err := h.validator.Struct(req); err != nil {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
 	}
-	
+
 	err := h.service.DeleteUser(req.ID)
 	if err != nil {
 		switch err {
@@ -201,7 +217,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	
+
 	WriteJSON(w, http.StatusNoContent, nil)
 }
 
@@ -224,7 +240,7 @@ func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.UserPatch
 
 	req.ID = chi.URLParam(r, "id")
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
@@ -234,7 +250,7 @@ func (h *Handler) PatchUser(w http.ResponseWriter, r *http.Request) {
 		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
 		return
 	}
-	
+
 	user, err := h.service.PatchUser(req.ID, req.Nickname, req.Password)
 	if err != nil {
 		switch err {

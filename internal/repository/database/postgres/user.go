@@ -39,14 +39,22 @@ func (r Repository) CreateUser(id, nickname, password string, createdAt time.Tim
 	return &user, nil
 }
 
-// TODO потом тут высрем quary params для сортировки братков
-func (r Repository) GetUsers() ([]*models.User, error) {
+func (r Repository) GetUsers(limit, offset int) ([]*models.User, error) {
 	pp := "internal/database/postgres/repository/GetUsers"
 
-	const query = `
-	SELECT id, nickname, password, created_at, updated_at FROM users`
+	query, args, err := squirrel.
+		Select("id", "nickname", "password", "created_at", "updated_at").
+		From("users").
+		OrderBy("created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
 
-	rows, err := r.pool.Query(context.Background(), query)
+	rows, err := r.pool.Query(context.Background(), query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("%s: error: %w", pp, err)
 	}
@@ -167,6 +175,30 @@ func (r Repository) PatchUser(id string, nickname, password *string, updatedAt t
 
 	var user models.User
 	err = r.pool.QueryRow(context.Background(), query, args...).Scan(
+		&user.ID,
+		&user.Nickname,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.ErrUserNotFound
+		}
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
+
+	return &user, nil
+}
+
+func (r Repository) GetUserByNickname(nickname string) (*models.User, error) {
+	pp := "internal/database/postgres/repository/GetUser"
+
+	const query = `
+	SELECT id, nickname, password, created_at, updated_at FROM users
+	WHERE nickname = $1`
+
+	var user models.User
+	err := r.pool.QueryRow(context.Background(), query, nickname).Scan(
 		&user.ID,
 		&user.Nickname,
 		&user.Password,

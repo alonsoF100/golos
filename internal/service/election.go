@@ -20,8 +20,16 @@ func (s Service) CreateElection(userID string, name string, description string) 
 	return election, nil
 }
 
-func (s Service) GetElections() ([]*models.Election, error) {
-	elections, err := s.repository.GetElections()
+func (s Service) GetElections(limit, offset int, nickname string) ([]*models.Election, error) {
+	validateLimit := validateLimit(limit)
+	validateOffset := validateOffset(offset)
+
+	user, err := s.repository.GetUserByNickname(nickname)
+	if err != nil {
+		return nil, apperrors.ErrUserNotFound
+	}
+
+	elections, err := s.repository.GetElections(validateLimit, validateOffset, user.ID)
 	if err != nil {
 		return nil, err
 	}
