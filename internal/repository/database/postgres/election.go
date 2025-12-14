@@ -13,8 +13,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO реализовать функциональность
 func (r Repository) CreateElection(id, userID, name string, description string, updatedAt time.Time, createdAt time.Time) (*models.Election, error) {
 	pp := "internal/database/postgres/repository/CreateElection"
 
@@ -42,7 +40,6 @@ func (r Repository) CreateElection(id, userID, name string, description string, 
 	return &election, nil
 }
 
-// TODO потом тут высрем quary params для сортировки
 func (r Repository) GetElections(limit, offset int, userID string) ([]*models.Election, error) {
 	pp := "internal/database/postgres/repository/GetElections"
 

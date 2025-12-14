@@ -12,8 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO реализовать функциональность
 func (r Repository) CreateVoteVariant(id, electionID, name string, createdAt time.Time, updatedAt time.Time) (*models.VoteVariant, error) {
 	pp := "internal/database/postgres/repository/CreateVoteVariant"
 
@@ -40,7 +38,6 @@ func (r Repository) CreateVoteVariant(id, electionID, name string, createdAt tim
 	return &voteVariant, nil
 }
 
-// TODO потом тут высрем quary params для сортировки
 func (r Repository) GetVoteVariants(electionID string) ([]*models.VoteVariant, error) {
 	pp := "internal/database/postgres/repository/GetVoteVariants"
 
