@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -64,23 +65,40 @@ failed:
   - response body: JSON with error + time
 */
 func (h *Handler) GetElections(w http.ResponseWriter, r *http.Request) {
+	var req dto.GetElections
 	query := r.URL.Query()
-
+	var err error
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
-	nickName := query.Get("nickname")
+	req.Nickname = query.Get("nickname")
+	var limit, offset int
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 10
+	if limitStr == "" {
+		limit = 20
+	} else {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("limit must be a number")))
+			return
+		}
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil {
+	if offsetStr == "" {
 		offset = 0
+	} else {
+		offset, err = strconv.Atoi(offsetStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("offset must be a number")))
+			return
+		}
 	}
 
-	elections, err := h.service.GetElections(limit, offset, nickName)
+	if err := h.validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	elections, err := h.service.GetElections(limit, offset, req.Nickname)
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
 		return

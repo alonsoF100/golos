@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -195,27 +196,45 @@ succeed:
 
 failed:
 
-	-status code:   500
+	-status code:   500, 400
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUserVotes(w http.ResponseWriter, r *http.Request) {
+	var req dto.GetUserVotes
+	var err error
 	query := r.URL.Query()
-	nickname := query.Get("nickname")
-	electionID := query.Get("election_id")
+	req.Nickname = query.Get("nickname")
+	req.ElectionID = query.Get("election_id")
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
+	var limit, offset int
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 10
+	if limitStr == "" {
+		limit = 20
+	} else {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("limit must be a number")))
+			return
+		}
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil {
+	if offsetStr == "" {
 		offset = 0
+	} else {
+		offset, err = strconv.Atoi(offsetStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("offset must be a number")))
+			return
+		}
 	}
 
-	votes, err := h.service.GetUserVotes(nickname, electionID, limit, offset)
+	if err := h.validator.Struct(req); err != nil {
+		WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(err))
+		return
+	}
+
+	votes, err := h.service.GetUserVotes(req.Nickname, req.ElectionID, limit, offset)
 	if err != nil {
 		switch err {
 		default:

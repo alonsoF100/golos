@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -64,23 +65,34 @@ succeed:
 
 failed:
 
-	-status code:   500
+	-status code:   500, 400
 	-response body: JSON with error + time
 */
 func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
-
+	var err error
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
+	var limit, offset int
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 10
+	if limitStr == "" {
+		limit = 20
+	} else {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("limit must be a number")))
+			return
+		}
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil {
+	if offsetStr == "" {
 		offset = 0
+	} else {
+		offset, err = strconv.Atoi(offsetStr)
+		if err != nil {
+			WriteJSON(w, http.StatusBadRequest, dto.NewErrorResponse(fmt.Errorf("offset must be a number")))
+			return
+		}
 	}
 
 	users, err := h.service.GetUsers(limit, offset)

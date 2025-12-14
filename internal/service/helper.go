@@ -6,7 +6,7 @@ const (
 )
 
 func validateLimit(limit int) int {
-	if limit <= 0 {
+	if limit < 0 {
 		return defaultLimit
 	}
 	if limit > maxLimit {

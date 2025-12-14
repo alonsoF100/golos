@@ -39,6 +39,10 @@ type ElectionPatch struct {
 	Description *string `json:"description,omitempty" validate:"omitempty,min=3,max=100"`
 }
 
+type GetElections struct {
+	Nickname string `validate:"required,alphanum,min=3,max=12"`
+}
+
 // Vote Variant DTOs
 type VoteVariantRequest struct {
 	ElectionID string `json:"election_id" validate:"required,uuid"`
@@ -74,3 +78,7 @@ type VotePatch struct {
 	UserID    string `json:"user_id"`
 }
 
+type GetUserVotes struct {
+	Nickname   string `validate:"required,alphanum,min=3,max=12"`
+	ElectionID string `validate:"omitempty,uuid"`
+}
