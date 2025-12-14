@@ -17,7 +17,7 @@ func (r Repository) CreateVote(uuid, userID, voteVariantID string, createdAt tim
 	pp := "internal/database/postgres/repository/CreateVote"
 
 	const query = `
-	INSERT INTO vote (id, user_id, variant_id, created_at, updated_at)
+	INSERT INTO votes (id, user_id, variant_id, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, user_id, variant_id, created_at, updated_at`
 
@@ -61,14 +61,6 @@ func (r Repository) GetVote(uuid string) (*models.Vote, error) {
 	}
 
 	return &vote, nil
-}
-
-func (r Repository) GetUserVotes(userID string) ([]*models.Vote, error) {
-	return nil, nil
-}
-
-func (r Repository) GetVariantVotes(voteVariantID string) ([]*models.Vote, error) {
-	return nil, nil
 }
 
 func (r Repository) DeleteVote(uuid string) error {
@@ -129,4 +121,59 @@ func (r Repository) PatchVote(uuid string, userID, voteVariantID *string, update
 	}
 
 	return &vote, nil
+}
+
+func (r Repository) GetUserVotes(userID string, voteVariantsIDs []string, limit, offset int) ([]*models.Vote, error) {
+	pp := "internal/database/postgres/repository/GetUserVotes"
+
+	qb := squirrel.Select("id", "user_id", "variant_id", "created_at", "updated_at").
+		From("votes").
+		Where(squirrel.Eq{"user_id": userID})
+
+	if len(voteVariantsIDs) > 0 {
+		qb = qb.Where(squirrel.Eq{"variant_id": voteVariantsIDs})
+	}
+
+	query, args, err := qb.OrderBy("created_at DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
+
+	rows, err := r.pool.Query(context.Background(), query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
+	defer rows.Close()
+
+	var votes []*models.Vote
+	for rows.Next() {
+		var vote models.Vote
+
+		err := rows.Scan(
+			&vote.ID,
+			&vote.UserID,
+			&vote.VariantID,
+			&vote.CreatedAt,
+			&vote.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("%s: error: %w", pp, err)
+		}
+
+		votes = append(votes, &vote)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%s: error: %w", pp, err)
+	}
+
+	return votes, nil
+}
+
+func (r Repository) GetVariantVotes(voteVariantID string) ([]*models.Vote, error) {
+	return nil, nil
 }

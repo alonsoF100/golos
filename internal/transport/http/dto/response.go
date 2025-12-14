@@ -159,3 +159,25 @@ func NewVoteResponse(vote *models.Vote) VoteResponse {
 		UpdatedAt: vote.UpdatedAt,
 	}
 }
+
+type VotesResponse struct {
+	Votes []*VoteResponse
+}
+
+func NewVotesResponse(votes []*models.Vote) VotesResponse {
+	responseVariants := VotesResponse{
+		Votes: make([]*VoteResponse, 0, len(votes)),
+	}
+	for _, vote := range votes {
+		temp := &VoteResponse{
+			ID:        vote.ID,
+			VariantID: vote.VariantID,
+			UserID:    vote.UserID,
+			CreatedAt: vote.CreatedAt,
+			UpdatedAt: vote.UpdatedAt,
+		}
+		responseVariants.Votes = append(responseVariants.Votes, temp)
+	}
+
+	return responseVariants
+}

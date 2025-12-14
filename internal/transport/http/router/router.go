@@ -51,6 +51,7 @@ func (rt Router) Setup() *chi.Mux {
 
 	r.Route("/golos/votes", func(r chi.Router) {
 		r.Post("/", rt.handlers.CreateVote)
+		r.Get("/", rt.handlers.GetUserVotes)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", rt.handlers.GetVote)
 			r.Put("/", rt.handlers.DeleteVote)

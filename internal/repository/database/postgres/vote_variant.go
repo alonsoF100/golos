@@ -44,6 +44,10 @@ func (r Repository) CreateVoteVariant(id, electionID, name string, createdAt tim
 func (r Repository) GetVoteVariants(electionID string) ([]*models.VoteVariant, error) {
 	pp := "internal/database/postgres/repository/GetVoteVariants"
 
+	if electionID == "" {
+		return nil, nil
+	}
+
 	const query = `
 	SELECT id, election_id, name, created_at, updated_at FROM vote_variants
 	WHERE election_id = $1`

@@ -29,14 +29,6 @@ func (s VoteService) GetVote(voteID string) (*models.Vote, error) {
 	return vote, nil
 }
 
-func (s VoteService) GetUserVotes(userID string) (*[]models.Vote, error) {
-	return nil, nil
-}
-
-func (s VoteService) GetVariantVotes(voteVariantID string) (*[]models.Vote, error) {
-	return nil, nil
-}
-
 func (s VoteService) DeleteVote(voteID string) error {
 	err := s.voteRepository.DeleteVote(voteID)
 	if err != nil {

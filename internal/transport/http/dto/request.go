@@ -60,7 +60,7 @@ type GetVoteVariantsRequest struct {
 
 // vote dtos
 type VoteRequest struct {
-	VariantID string `json:"variat_id" validate:"required,uuid"`
+	VariantID string `json:"variant_id" validate:"required,uuid"`
 	UserID    string `json:"user_id" validate:"required,uuid"`
 }
 
@@ -73,3 +73,4 @@ type VotePatch struct {
 	VariantID string `json:"variant_id"`
 	UserID    string `json:"user_id"`
 }
+

@@ -24,6 +24,7 @@ type ElectionService interface {
 // Интерфейс для кросс-доменных операций
 type Facade interface {
 	GetElections(limit, offset int, nickname string) ([]*models.Election, error)
+	GetUserVotes(nickname, electionID string, limit int, offset int) ([]*models.Vote, error)
 }
 
 type VoteVariantService interface {
@@ -37,8 +38,7 @@ type VoteVariantService interface {
 type VoteService interface {
 	CreateVote(userID, voteVariantID string) (*models.Vote, error)
 	GetVote(voteID string) (*models.Vote, error)
-	GetUserVotes(userID string) (*[]models.Vote, error)
-	GetVariantVotes(voteVariantID string) (*[]models.Vote, error)
+	GetVariantVotes(voteVariantID string) ([]*models.Vote, error)
 	DeleteVote(voteID string) error
 	PatchVote(voteID string, userID, voteVariantID *string) (*models.Vote, error)
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	apperrors "github.com/alonsoF100/golos/internal/erorrs"
 	"github.com/alonsoF100/golos/internal/transport/http/dto"
@@ -180,4 +181,48 @@ func (h *Handler) PatchVote(w http.ResponseWriter, r *http.Request) {
 	}
 
 	WriteJSON(w, http.StatusOK, dto.NewVoteResponse(vote))
+}
+
+/*
+pattern: /golos/votes?user_id=123123&election_id=12313?limit=20&offset=20
+method:  GET
+info:    nickname and election_id (if exist) + limit + offset from query
+
+succeed:
+
+	-status code:   200 ok
+	-response body: JSON represented users votes
+
+failed:
+
+	-status code:   500
+	-response body: JSON with error + time
+*/
+func (h *Handler) GetUserVotes(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	nickname := query.Get("nickname")
+	electionID := query.Get("election_id")
+	limitStr := query.Get("limit")
+	offsetStr := query.Get("offset")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		limit = 10
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		offset = 0
+	}
+
+	votes, err := h.service.GetUserVotes(nickname, electionID, limit, offset)
+	if err != nil {
+		switch err {
+		default:
+			WriteJSON(w, http.StatusInternalServerError, dto.NewErrorResponse(err))
+			return
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, dto.NewVotesResponse(votes))
 }

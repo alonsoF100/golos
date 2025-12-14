@@ -36,7 +36,7 @@ type VoteVariantRepository interface {
 type VoteRepository interface {
 	CreateVote(uuid, userID, voteVariantID string, createdAt time.Time, updatedAt time.Time) (*models.Vote, error)
 	GetVote(uuid string) (*models.Vote, error)
-	GetUserVotes(userID string) ([]*models.Vote, error)
+	GetUserVotes(userID string, voteVariantsIDs []string, limit, offset int) ([]*models.Vote, error)
 	GetVariantVotes(voteVariantID string) ([]*models.Vote, error)
 	DeleteVote(uuid string) error
 	PatchVote(uuid string, userID, voteVariantID *string, updatedAt time.Time) (*models.Vote, error)
